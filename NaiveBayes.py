@@ -10,7 +10,13 @@ def jose():
     print "Training Set %d" % len(training)
     print "Testing Set %d" % len(testing)
 
-    singleFeatureNaiveBayesFirstTower(training, testing)
+    resultList = []
+    for i in range(0, 100):
+        shuffle(data)
+        training, testing = split_data(data, 600)
+        result = singleFeatureNaiveBayesFirstTower(training, testing)
+        resultList.append(result)
+    print "Average Result %02f" % (sum(resultList) / len(resultList))
 
 def singleFeatureNaiveBayesFirstTower(training, testing):
     firsTower = {}
@@ -24,7 +30,7 @@ def singleFeatureNaiveBayesFirstTower(training, testing):
             if team['winner'] == True:
                 firsTower[team['firstTower']] += 1
 
-    print firsTower
+    # print firsTower
 
     majorityResult = None
 
@@ -44,7 +50,10 @@ def singleFeatureNaiveBayesFirstTower(training, testing):
                     correctClassiciation += 1
 
     print "Naive Bayes Single Feature 'firstTower'"
-    print "Correctly Predicted %d out of %d or %.02f%%" % (correctClassiciation, len(testing), correctClassiciation * 1.0 / len(testing) * 100)
+    result = correctClassiciation * 1.0 / len(testing) * 100
+    print "Correctly Predicted %d out of %d or %.02f%%" % (correctClassiciation, len(testing), result)
+
+    return result
 
 def mitchell():
     print "Mitchell"
