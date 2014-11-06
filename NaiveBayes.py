@@ -14,11 +14,22 @@ def jose():
     for i in range(0, 100):
         shuffle(data)
         training, testing = split_data(data, 600)
-        result = singleFeatureNaiveBayesFirstTower(training, testing)
+        result = singleFeatureNaiveBayesFirstTower(training, testing, True)
         resultList.append(result)
     print "Average Result %02f" % (sum(resultList) / len(resultList))
 
-def singleFeatureNaiveBayesFirstTower(training, testing):
+    newData = getQueueType(data, ['NORMAL_5x5_BLIND', 'ARAM_5x5', 'NORMAL_5x5_DRAFT'])
+    print len(newData)
+
+    resultList = []
+    for i in range(0, 100):
+        shuffle(newData)
+        training, testing = split_data(newData, int(len(newData) * .8))
+        result = singleFeatureNaiveBayesFirstTower(training, testing, False)
+        resultList.append(result)
+    print "Average Result %02f" % (sum(resultList) / len(resultList))
+
+def singleFeatureNaiveBayesFirstTower(training, testing, debug):
     firsTower = {}
     firsTower[True] = 0
     firsTower[False] = 0
@@ -48,10 +59,11 @@ def singleFeatureNaiveBayesFirstTower(training, testing):
             if team['firstTower'] == majorityResult:
                 if team['winner'] == True:
                     correctClassiciation += 1
-
-    print "Naive Bayes Single Feature 'firstTower'"
+    if debug:
+        print "Naive Bayes Single Feature 'firstTower'"
     result = correctClassiciation * 1.0 / len(testing) * 100
-    print "Correctly Predicted %d out of %d or %.02f%%" % (correctClassiciation, len(testing), result)
+    if debug:
+        print "Correctly Predicted %d out of %d or %.02f%%" % (correctClassiciation, len(testing), result)
 
     return result
 
@@ -60,6 +72,13 @@ def mitchell():
 
 def keerti():
     print "Keerti"
+
+def getQueueType(data, queueTypes):
+    newData = []
+    for index, match in enumerate(data):
+        if match['queueType'] in queueTypes:
+            newData.append(match)
+    return  newData
 
 def split_data(data, num):
     training = []
