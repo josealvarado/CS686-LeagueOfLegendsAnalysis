@@ -1,4 +1,5 @@
 import ast
+from random import shuffle
 
 def jose():
     print "Jose"
@@ -78,6 +79,7 @@ def loadJsonFile(file):
         if index % 100 == 0:
             print "Loading data from file"
 
+    shuffle(data)
     return data
 
 if __name__ == '__main__':
