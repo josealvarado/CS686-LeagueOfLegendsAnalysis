@@ -5,14 +5,6 @@ Data Mining: Leage of Legends
 
 
 Naive Bayes
-
-    Keerti
-        firstDragon
-        firstInhibitor
-        firstbarron
-        firstBlood
-        firstTower
-
         Compare these between different queueTypes
 
     Jose
