@@ -7,16 +7,25 @@ Data Mining: Leage of Legends
 Naive Bayes
 
     Keerti
+        physicalDamageTaken
+        neutralMinionsKilled
+        inhibitorKills
+        neutralMinionsKilledEnemyJungle
+        magicDamageDealtToChampions
+        towerKills
+        firstBloodKill
+        goldSpent
+        doubleKills
+        killingSprees
+
+        
+
+    Jose
         firstDragon
         firstInhibitor
         firstbarron
         firstBlood
         firstTower
-
-        Compare these between different queueTypes
-
-    Jose
-        5 listed above + the following
             totalDamageTaken
             totalDamageDealt
             largestMultiKill
