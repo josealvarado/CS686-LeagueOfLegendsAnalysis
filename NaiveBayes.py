@@ -33,6 +33,80 @@ def jose():
 
     firstFeaturesNaiveBayes(training, testing, ['firstTower', 'firstBlood', 'firstBaron', 'firstInhibitor', 'firstDragon'], False)
 
+    decisionTree(data)
+
+def decisionTree(data):
+    print "Decision Tree"
+    features = ['firstTower', 'firstBlood']
+
+    results = getWinsandLoasses(data, features)
+
+    # while len(features) > 0:
+
+    informationGainPerFeature = {}
+    h = H(results['Wins'], results['Loses'])
+    total = results['Wins'] + results['Loses']
+    print total
+
+    for feature in features:
+        print feature
+        valueTrueFalseFeature = results[feature][True][False]
+        valueTrueTrueFeature = results[feature][True][True]
+
+        valueTrueFeature = H(valueTrueTrueFeature, valueTrueFalseFeature)
+        print valueTrueFeature
+
+        valueFalseFalseFeature = results[feature][False][False]
+        valueFalseTrueFeature = results[feature][False][True]
+
+        valueFalseFeature = H(valueFalseTrueFeature, valueFalseFalseFeature)
+        print valueFalseFeature
+
+        impurityPerFeature = 1.0 * (valueTrueFalseFeature + valueTrueTrueFeature) / total * valueTrueFeature + 1.0 * (valueFalseFalseFeature + valueFalseTrueFeature) / total * valueFalseFeature
+
+        informationGainPerFeature[feature] = impurityPerFeature
+
+    print informationGainPerFeature
+
+
+def H(p, n):
+    print p
+    print n
+    return 1.0* -p/(p+n) * math.log(1.0 * p/(p+n), 2) - 1.0 * n/(p+n) * math.log(1.0 * n/(p+n),2)
+
+def getWinsandLoasses(newData, teamFeatures):
+    totalCount = {}
+    totalCount['Wins'] = 0
+    totalCount['Loses'] = 0
+    # Initialize count
+    for feature in teamFeatures:
+        totalCount[feature] = {}
+        totalCount[feature][True] = {}
+        totalCount[feature][True][True] = 0
+        totalCount[feature][True][False] = 0
+
+        totalCount[feature][False] = {}
+        totalCount[feature][False][True] = 0
+        totalCount[feature][False][False] = 0
+
+    for index, match in enumerate(newData):
+        teamResults = match['teams']
+
+        for team in teamResults:
+            if team['teamId'] == 100:
+                if team['winner']:
+                    for feature in teamFeatures:
+                        totalCount[feature][team[feature]][True] += 1
+                    totalCount['Wins'] += 1
+                else:
+                    for feature in teamFeatures:
+                        totalCount[feature][team[feature]][False] += 1
+                    totalCount['Loses'] += 1
+            # Should not ignore the results from team 2
+
+    # print totalCount
+    return totalCount
+
 def firstFeaturesNaiveBayes(training, testing, teamFeatures, debug):
     totalCount = {}
     totalCount['Wins'] = 0

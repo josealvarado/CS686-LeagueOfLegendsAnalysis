@@ -5,12 +5,10 @@ Data Mining: Leage of Legends
 
 
 Naive Bayes
-<<<<<<< HEAD
         Compare these between different queueTypes
 
     Jose
         5 listed above + the following
-=======
 
     Keerti
         physicalDamageTaken
@@ -32,7 +30,6 @@ Naive Bayes
         firstbarron
         firstBlood
         firstTower
->>>>>>> FETCH_HEAD
             totalDamageTaken
             totalDamageDealt
             largestMultiKill
