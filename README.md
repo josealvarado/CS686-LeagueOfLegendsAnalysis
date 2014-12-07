@@ -11,17 +11,21 @@ Naive Bayes
         5 listed above + the following
 
     Keerti
+        Continuous: 
+        
         physicalDamageTaken
         neutralMinionsKilled
         inhibitorKills
         neutralMinionsKilledEnemyJungle
         magicDamageDealtToChampions
         towerKills
-        firstBloodKill
         goldSpent
         doubleKills
         killingSprees
-
+        
+        binary :
+        firstBloodAssist
+        firstBloodKill
         
 
     Jose
