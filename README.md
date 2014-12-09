@@ -29,11 +29,14 @@ Naive Bayes
         
 
     Jose
+
+        Predict 85% correct
         firstDragon
         firstInhibitor
         firstbarron
         firstBlood
         firstTower
+
             totalDamageTaken
             totalDamageDealt
             largestMultiKill

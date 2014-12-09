@@ -113,10 +113,15 @@ class DecisionTree():
         "*** YOUR CODE HERE AS NEEDED***"
         #call recursive classify method on the learned tree for each x in X
 
+
+
     def entropy(self, valTrue, valFalse):
         """
         Calculates the entropy of the given data set for the target attribute
         """
+        if valTrue == 0 or valFalse == 0:
+            return 0
+
         data_entropy = 0.0
         for val in [valTrue, valFalse]:
             data_entropy += (-1.0 * val)/(valTrue + valFalse) * math.log(1.0 * val / (valTrue + valFalse), 2)
@@ -335,6 +340,7 @@ class TreeNode:
         attributes - the names of all the attributes
        '''
        "*** YOUR CODE HERE ***"
+
 
 
 
