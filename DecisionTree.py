@@ -107,13 +107,59 @@ class DecisionTree():
                 self.printTree(root.children[k],k,indentNum+1)
             print indent+"}"
 
-    def predict(self, X):
+    def predict(self, X = None):
         ''' Return a class label using the decision tree created by the fit method
         '''
         "*** YOUR CODE HERE AS NEEDED***"
         #call recursive classify method on the learned tree for each x in X
 
+        correct = 0
 
+        predicted_labels = []
+
+        if not X:
+            X = self.data
+
+        for index, match in enumerate(X):
+            label = None
+            current_node = self.tree
+            while label is None:
+                if current_node.is_leaf():
+                    label = current_node.value
+                else:
+                    key_value = self.getKeyValue(match, current_node.feature)
+                    if key_value in current_node.children:
+                        current_node = current_node.children[key_value]
+                    else:
+                        label = True
+
+            correct_label = self.getWinningValue(match)
+            if correct_label == label:
+                correct += 1
+
+            predicted_labels.append(label)
+
+        result = correct * 1.0 / len(X) * 100
+        print "Correctly Predicted %d out of %d or %.02f%%" % (correct, len(X), result)
+
+        return predicted_labels
+
+    def getWinningValue(self, match):
+        teamResults = match['teams']
+
+        for team in teamResults:
+            if team['teamId'] == 100:
+                return team['winner']
+
+    def getKeyValue(self, match, feature):
+        # print data
+        # for index, match in enumerate(data):
+            # print match
+        teamResults = match['teams']
+
+        for team in teamResults:
+            if team['teamId'] == 100:
+                return team[feature]
 
     def entropy(self, valTrue, valFalse):
         """
@@ -347,3 +393,4 @@ class TreeNode:
 if __name__ == '__main__':
     tree = DecisionTree()
     tree.fit()
+    tree.predict()
