@@ -15,7 +15,7 @@ Naive Bayes
         
         physicalDamageTaken
         neutralMinionsKilled
-        inhibitorKills
+        inhibitorKillsfvsf vszg brsz g
         neutralMinionsKilledEnemyJungle
         magicDamageDealtToChampions
         towerKills
