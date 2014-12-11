@@ -14,7 +14,7 @@ import time
 import sys
 
 
-def main():
+# def main():
 
 # lol = LeagueOfLegends('d17bf0eb-0ded-4c06-b41b-d9b03fbf6bd1')
 
@@ -84,7 +84,7 @@ if __name__ == '__main__':
 
     value = int(game_id)
 
-    for i in range(0, 1000):
+    for i in range(0, 100000):
         time.sleep(1)
         # print value - i
         try:

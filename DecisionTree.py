@@ -8,12 +8,12 @@ class DecisionTree():
     '''
     Sklearn-style decision tree classifier, using entropy
     '''
-    def __init__(self, file_name = "datadump.txt", features = ['firstTower', 'firstBlood', 'firstBaron', 'firstInhibitor'], attrib_d=None, attribs=None, default_v=None):
+    def __init__(self, file_name = "test.txt", features = ['firstTower', 'firstBlood', 'firstBaron', 'firstInhibitor', 'firstDragon'], attrib_d=None, attribs=None, default_v=None):
         ''' initialize classifier
         '''
 
         self.data = self.loadJsonFile(file_name)
-        print len(self.data)
+        self.data = self.getQueueType(self.data, ['NORMAL_5x5_BLIND', 'RANKED_SOLO_5x5'])
 
         self.features = features
 
@@ -28,6 +28,13 @@ class DecisionTree():
 
         "*** YOUR CODE HERE AS NEEDED ***"
 
+    def getQueueType(self, data, queueTypes):
+        newData = []
+        for index, match in enumerate(data):
+            if match['queueType'] in queueTypes:
+                newData.append(match)
+        return  newData
+
     def loadJsonFile(self, file_name):
         jsonData = open(file_name)
         data = []
@@ -39,8 +46,8 @@ class DecisionTree():
             # print dictMatch
             # print dictMatch['matchId']
 
-            if index % 100 == 0:
-                print "Loading data from file"
+            # if index % 100 == 0:
+            #     print "Loading data from file"
 
         shuffle(data)
         return data
@@ -85,7 +92,7 @@ class DecisionTree():
         # self.clf = self.makeTree(X, y, self.attribute_list, self.attrib_dict, self.default_value)
 
         self.results = self.getResults(self.data, self.features)
-        print self.results
+        # print self.results
 
         self.tree = self.makeTree(self.data, self.features, self.features[0])
         # print self.tree
@@ -140,9 +147,9 @@ class DecisionTree():
             predicted_labels.append(label)
 
         result = correct * 1.0 / len(X) * 100
-        print "Correctly Predicted %d out of %d or %.02f%%" % (correct, len(X), result)
+        print "Correctly Predicted %d out of %d or %.05f%%" % (correct, len(X), result)
 
-        return predicted_labels
+        return result
 
     def getWinningValue(self, match):
         teamResults = match['teams']
@@ -175,20 +182,6 @@ class DecisionTree():
         # print "data_entropy" + str(data_entropy)
         return data_entropy
 
-    # ### Compute remainder - this is the amount of entropy left in the data after
-    # ### we split on a particular attribute. Let's assume the input data is of
-    # ### the form:
-    # ###    [(value1, class1), (value2, class2), ..., (valuen, classn)]
-    # def remainder(self, data) :
-    #     possibleValues = set([item[0] for item in data])
-    #     r = 0.0
-    #     for value in possibleValues :
-    #         c = [item[0] for item in data].count(value)
-    #         r += (float(c) / len(data) ) * self.entropy([item[1] for item in
-    #                                             data if item[0] == value])
-    #     return r
-
-
     def informationGain(self, data, entropyOfWholeData, feature, results):
         """
         Calculates the information gain (reduction in entropy) that would
@@ -218,7 +211,7 @@ class DecisionTree():
         return (entropyOfWholeData- subset_entropy)
 
     def selectFeature(self, data, features):
-        print "selectFeature"
+        # print "selectFeature"
         """
         Selects the feature to best classify our data
         Represented by the lowest information gain
@@ -233,7 +226,7 @@ class DecisionTree():
             # print "wins: " + str(self.results["Wins"]) + " loss: " + str(self.results["Loses"])
             # print "entropyOfWholeData: " + str(entropyOfWholeData)
             informationGainPerFeature[feature] = self.informationGain(data, entropyOfWholeData, feature, results)
-        print informationGainPerFeature
+        # print informationGainPerFeature
 
         if len(informationGainPerFeature) > 0:
             return min(informationGainPerFeature, key=informationGainPerFeature.get)
@@ -241,7 +234,7 @@ class DecisionTree():
             return None
 
     def get_examples(self, data, feature, feature_value):
-        print "get_examples"
+        # print "get_examples"
         new_data = []
         for index, match in enumerate(data):
             teamResults = match['teams']
@@ -253,7 +246,7 @@ class DecisionTree():
         return new_data
 
     def get_values(self, data, feature):
-        print "get_values"
+        # print "get_values"
         new_data = []
         for index, match in enumerate(data):
             teamResults = match['teams']
@@ -268,7 +261,7 @@ class DecisionTree():
         # subset = results[best_feature]
 
     def get_majority_value(self, data, feature):
-        print "get_majority_value"
+        # print "get_majority_value"
         results = self.getResults(data, [feature])
         wins = results["Wins"]
         loss = results["Loses"]
@@ -309,26 +302,26 @@ class DecisionTree():
         ''' Helper recursive function for creating a tree
         '''
 
-        print "Data Size: " + str(len(data)) + ", Features: " + str(features) + ", Target_Feature: " + target_feature
+        # print "Data Size: " + str(len(data)) + ", Features: " + str(features) + ", Target_Feature: " + target_feature
         # print data
         vals = self.get_values(data, target_feature)
-        print vals
+        # print vals
         default = self.get_majority_value(data, target_feature)
 
         # If the dataset is empty or the attributes list is empty, return the
         # default value. When checking the attributes list for emptiness, we
         # need to subtract 1 to account for the target attribute.
         if len(data) <= 0 or len(features) <= 0:
-            print "Case 1"
+            # print "Case 1"
             subset = TreeNode()
             subset.value = default
             return subset
 
         # If all the records in the dataset have the same classification, return that classification.
         elif vals.count(vals[0]) == len(vals):
-            print "Case 2"
-            print vals.count(vals[0])
-            print len(vals)
+            # print "Case 2"
+            # print vals.count(vals[0])
+            # print len(vals)
             subset = TreeNode()
             subset.value = vals[0]
             return subset
@@ -336,7 +329,7 @@ class DecisionTree():
         else:
             # Choose the next best attribute to best classify our data
             best_feature = self.selectFeature(data, features)
-            print best_feature
+            # print best_feature
 
             # Create a new decision tree/node with the best feature
             tree_node = TreeNode(best_feature)
@@ -346,7 +339,7 @@ class DecisionTree():
             # in the best feature
             results = self.getResults(data, [best_feature])
             subset = results[best_feature]
-            print subset
+            # print subset
             for val in subset.keys():
 
                 # Create a subtree for the current value under the "best" field
@@ -367,30 +360,29 @@ class TreeNode:
         self.value = value
         self.children = {}
 
-    # def __repr__(self):
-    #     if self.feature:
-    #         return self.feature
-    #     else:
-    #         return self.value
-
     ### a node with no children is a leaf
     def is_leaf(self):
         return self.children == {}
 
-    ###
-    def classify(self, x, attributes, default_value):
-       '''
-       return the value for the given data
-       the input will be:
-       x - an object to classify - [v1, v2, ..., vn]
-        attributes - the names of all the attributes
-       '''
-       "*** YOUR CODE HERE ***"
+def split_data(data, num):
+    training = []
+    testing = []
 
+    for index, value in enumerate(data):
+        if index < num:
+            training.append(value)
+        else:
+            testing.append(value)
 
+    return training, testing
 
 
 if __name__ == '__main__':
     tree = DecisionTree()
     tree.fit()
     tree.predict()
+
+    data = tree.data
+    shuffle(data)
+    training, testing = split_data(data, (int)(len(data) * .8))
+    tree.predict(training)

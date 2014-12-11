@@ -54,7 +54,7 @@ def decisionTree(data):
         valueTrueTrueFeature = results[feature][True][True]
 
         valueTrueFeature = H(valueTrueTrueFeature, valueTrueFalseFeature)
-        print valueTrueFeature
+        # print valueTrueFeature
 
         valueFalseFalseFeature = results[feature][False][False]
         valueFalseTrueFeature = results[feature][False][True]
@@ -142,8 +142,8 @@ def getBucketsForFeature(training, feature):
 
     list.sort()
     print list
-    minValue = list[0]
-    maxValue = list[len(list)-1]
+    minValue = min(list)
+    maxValue = max(list)
     print "minValue: " + str(minValue) + " maxValue: " + str(maxValue)
     increment = (1.0 * maxValue / numberOfBuckets)
     print increment
@@ -182,6 +182,8 @@ def firstFeaturesNaiveBayes(training, testing, teamFeatures, debug):
         totalCount[feature] = {}
         if feature in getValidListOfContinousFeatures():
             buckets = getBucketsForFeature(training, feature)
+            # print feature
+            # print buckets
             totalCount[feature]['buckets'] = buckets
             for bucket in buckets:
                 totalCount[feature][bucket] = {}
@@ -253,6 +255,7 @@ def firstFeaturesNaiveBayes(training, testing, teamFeatures, debug):
         for participant in participants:
             for feature in teamFeatures:
                 if feature in getValidListOfContinousFeatures():
+                    # print participant
                     kills = participant['stats'][feature]
 
                     bucket = getBucketForValue(kills, totalCount[feature]['buckets'])
