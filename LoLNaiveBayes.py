@@ -13,7 +13,6 @@ class LeagueOfLegends:
         self.priorProbT1 = 0.0
         self.priorProbT2 = 0.0
         self.data = []
-        #self.continuousFeatures = []
         self.truthList = []
         self.guessList = []
         self.trainingData = []
@@ -26,14 +25,18 @@ class LeagueOfLegends:
     def readData(self):
         data_file = "datadump.txt"
         txt = open(data_file)
-        #global data
         data = self.data # Data about all the matches
-        #cnt = 0
+        #queueType = 'NORMAL_5x5_BLIND'
+        #queueType = 'ARAM_5x5'
+        queueType = "MIXED"
         for i,dat in enumerate(txt):
-            #cnt +=1
-            data.append(dat)
-            #if cnt == 100:
-                #break
+            dat = ast.literal_eval(dat)
+            if dat['queueType'] == queueType:
+                dat = str(dat)
+                data.append(dat)
+            elif queueType == 'MIXED':
+                dat = str(dat)
+                data.append(dat)
 
     def trainLoLModel(self):
         #print("hello")
@@ -56,31 +59,8 @@ class LeagueOfLegends:
         # featureList = ['physicalDamageTaken', 'neutralMinionsKilled', 'inhibitorKills', 'neutralMinionsKilledEnemyJungle',
         #                'magicDamageDealtToChampions', 'towerKills', 'goldSpent', 'doubleKills', 'killingSprees','firstBloodKill']
 
-        continuousFeatures = ['physicalDamageTaken', 'neutralMinionsKilled', 'inhibitorKills', 'neutralMinionsKilledEnemyJungle',
-                       'magicDamageDealtToChampions', 'towerKills', 'goldSpent', 'doubleKills', 'killingSprees']
-        binaryFeatures = ['firstBlood','firstTower']
-
-        # for f in range(0,len(continuousFeatures)):
-        #     feature = continuousFeatures[f]
-        #     #print(trainingData[0])
-        #     #print(type(trainingData[0]))
-        #     try:
-        #         trainingData = ast.literal_eval(trainingData[0])
-        #     except KeyError:
-        #         pass
-        #     #print(trainingData)
-        #     #print(type(trainingData))
-        #     #sys.exit(0)
-        #     try:
-        #         print(feature)
-        #         print(trainingData['participants'][0]['stats'][feature])
-        #         if trainingData['participants'][0]['stats'][feature] == True or False:
-        #             print("here")
-        #             binaryFeatures.append(feature)
-        #     except KeyError:
-        #         pass
-        # print("binary features are",binaryFeatures)
-        # sys.exit(0)
+        binaryFeatures = ['firstInhibitor','firstTower','firstBaron','firstBlood','firstDragon']
+        continuousFeatures = ['towerKills','inhibitorKills','baronKills','dragonKills']
 
         self.continuousFeatures = continuousFeatures
         ''' Count of no of time Team1 winning and Team2 winning '''
@@ -161,7 +141,7 @@ class LeagueOfLegends:
         teamOneFeatureValueSumDict = {} # list with data about team1's sum of featureValues for each match
         teamTwoFeatureValueSumDict = {}
         #myList = []
-        for i in range(0,len(continuousFeatures)-1): # Go through each feature
+        for i in range(0,len(continuousFeatures)): # Go through each feature
             feature = continuousFeatures[i]
             teamOneFeatureValue = 0
             teamTwoFeatureValue = 0
@@ -178,13 +158,6 @@ class LeagueOfLegends:
                 singleMatchDict = ast.literal_eval(trainingData[m]) # single match.dict
                 #print(singleMatchDict)
                 statusofTeamOneWins = singleMatchDict['teams'][0]['winner'] # whether Team1 won or lost
-                #print("status of Team1wINS",status ofTeamOneWins)
-                #sys.exit(0)
-                #print("feature",feature)
-                #print("data0",data[0])
-                #print("data2",data[40])
-
-                #sys.exit(0)
                 participantsList = singleMatchDict['participants'] # details of all the participants of a match
                 #print("len",len(participantsList))
 
@@ -222,19 +195,10 @@ class LeagueOfLegends:
         print("teamOneFeatureValueSum",teamOneFeatureValueSumDict)
         #print("myList",myList)
         print("teamTwoFeatureValueSum",teamTwoFeatureValueSumDict)
-        # count =0
-        # error = 0
-        # for i in range(0,len(data)):
-        #     if teamOneFeatureValueSumDict['killingSprees'][i] == 0 and myList[i] == 0:
-        #         count +=1
-        #     else:
-        #         error +=1
-        # print("count is",count)
-        # print("error in data is",error)
         ''' Calculate Gaussian variance for all the continuous features when y is Y1(Team1 wins) and Y2(Team2 wins) '''
         varianceDictY1 = self.varianceDictT1
         varianceDictY2 = self.varianceDictT2
-        for f in range(0,len(continuousFeatures)-1):
+        for f in range(0,len(continuousFeatures)):
             feature = continuousFeatures[f]
             teamOneVarianceSum = 0
             teamTwoVarianceSum = 0
@@ -284,46 +248,50 @@ class LeagueOfLegends:
         posteriorProbListT1 = [] #Stores the probabilities of each feature for a single match when T1 wins
         posteriorProbListT2 = [] #Stores the probabilities of each feature for a single match when T2 wins
         ''' Considering T1 wins '''
-        for f in range(0,len(self.continuousFeatures)):
-            feature = self.continuousFeatures[f]
-            xValue = 0
-            '''xValue when T1 wins, summation of all the feature values for each feature. first 5 players '''
-            for i in range(0,5):
+        if len(self.continuousFeatures) > 0:
+            for f in range(0,len(self.continuousFeatures)):
+                feature = self.continuousFeatures[f]
+                xValue = 0
+                '''xValue when T1 wins, summation of all the feature values for each feature. first 5 players '''
+                for i in range(0,5):
+                    try:
+                        xValue += singleMatchData['participants'][i]['stats'][feature]
+                    except KeyError:
+                        pass
+                    except IndexError:
+                        pass
+                '''Posterior probability calculation when T1'''
                 try:
-                    xValue += singleMatchData['participants'][i]['stats'][feature]
+                    posteriorProb = ((float)(1)/math.sqrt((float)(2*math.pi*self.varianceDictT1[feature]))) * (math.exp((-0.5) * ((float)(math.pow((xValue-self.meanDictT1[feature]),2))/(float)(self.varianceDictT1[feature]))))
                 except KeyError:
                     pass
-                except IndexError:
-                    pass
-            '''Posterior probability calculation when T1'''
-            try:
-                posteriorProb = ((float)(1)/math.sqrt((float)(2*math.pi*self.varianceDictT1[feature]))) * (math.exp((-0.5) * ((float)(math.pow((xValue-self.meanDictT1[feature]),2))/(float)(self.varianceDictT1[feature]))))
-            except KeyError:
-                pass
-            except ZeroDivisionError:
-                posteriorProb = 1
-            posteriorProbListT1.append(posteriorProb) # each posterior prob value is added to the list for single feature
+                except ZeroDivisionError:
+                    posteriorProb = 1
+                    #pass
+                posteriorProbListT1.append(posteriorProb) # each posterior prob value is added to the list for single feature
 
         ''' Considering T2 wins '''
-        for f in range(0,len(self.continuousFeatures)):
-            feature = self.continuousFeatures[f]
-            xValue = 0
-            '''xValue when T2 wins, summation of all the feature values for each feature. last 5 players '''
-            for i in range(5,10):
+        if len(self.continuousFeatures) >0 :
+            for f in range(0,len(self.continuousFeatures)):
+                feature = self.continuousFeatures[f]
+                xValue = 0
+                '''xValue when T2 wins, summation of all the feature values for each feature. last 5 players '''
+                for i in range(5,10):
+                    try:
+                        xValue += singleMatchData['participants'][i]['stats'][feature]
+                    except KeyError:
+                        pass
+                    except IndexError:
+                        pass
+                '''Posterior probability calculation when T2 wins'''
                 try:
-                    xValue += singleMatchData['participants'][i]['stats'][feature]
+                    posteriorProb = ((float)(1)/math.sqrt((float)(2*math.pi*self.varianceDictT2[feature]))) * (math.exp((-0.5) * ((float)(math.pow((xValue-self.meanDictT2[feature]),2))/(float)(self.varianceDictT2[feature]))))
                 except KeyError:
                     pass
-                except IndexError:
-                    pass
-            '''Posterior probability calculation when T2 wins'''
-            try:
-                posteriorProb = ((float)(1)/math.sqrt((float)(2*math.pi*self.varianceDictT2[feature]))) * (math.exp((-0.5) * ((float)(math.pow((xValue-self.meanDictT2[feature]),2))/(float)(self.varianceDictT2[feature]))))
-            except KeyError:
-                pass
-            except ZeroDivisionError:
-                posteriorProb = 1
-            posteriorProbListT2.append(posteriorProb) # each posterior prob value is added to the list for single feature
+                except ZeroDivisionError:
+                    posteriorProb = 1
+                    #pass
+                posteriorProbListT2.append(posteriorProb) # each posterior prob value is added to the list for single feature
         print("postProbListT1",posteriorProbListT1)
         print("postProbListT2",posteriorProbListT2)
         #print(self.priorProbT1)
@@ -332,30 +300,34 @@ class LeagueOfLegends:
         '''Calculating log joint probability for a single match considering T1 wins '''
         logJointProbT1 = 0.0
         ''' Probabilities for continuous features '''
-        for i in range(0,len(posteriorProbListT1)): # no of continuous features
-            logJointProbT1 += math.log(posteriorProbListT1[i], 10)
+        if len(self.continuousFeatures) > 0:
+            for i in range(0,len(posteriorProbListT1)): # no of continuous features
+                logJointProbT1 += math.log(posteriorProbListT1[i], 10)
         '''Probabilities for binary features '''
-        for i in range(0,len(self.binaryFeatures)): # no of binary features
-            feature = self.binaryFeatures[i]
-            if singleMatchData['teams'][0][feature] == True:
-                logJointProbT1 += math.log(self.binaryFeatProbDictT1[feature]['True'], 10)
-            else:
-                logJointProbT1 += math.log(self.binaryFeatProbDictT1[feature]['False'], 10)
+        if len(self.binaryFeatures) > 0:
+            for i in range(0,len(self.binaryFeatures)): # no of binary features
+                feature = self.binaryFeatures[i]
+                if singleMatchData['teams'][0][feature] == True:
+                    logJointProbT1 += math.log(self.binaryFeatProbDictT1[feature]['True'], 10)
+                else:
+                    logJointProbT1 += math.log(self.binaryFeatProbDictT1[feature]['False'], 10)
         logJointProbT1 += math.log(self.priorProbT1, 10)
 
         '''Calculating log joint probability for a single match considering T2 wins '''
         logJointProbT2 = 0.0
         ''' Probabilities for continuous features  '''
-        for i in range(0,len(posteriorProbListT2)): # no of continuous features
-            logJointProbT2 += math.log(posteriorProbListT2[i], 10)
+        if len(self.continuousFeatures) > 0:
+            for i in range(0,len(posteriorProbListT2)): # no of continuous features
+                logJointProbT2 += math.log(posteriorProbListT2[i], 10)
         '''Probabilities for binary features '''
-        for i in range(0,len(self.binaryFeatures)): # no of binary features
-            feature = self.binaryFeatures[i]
-            if singleMatchData['teams'][0][feature] == True:
-                logJointProbT2 += math.log(self.binaryFeatProbDictT2[feature]['True'], 10)
-            else:
-                logJointProbT2 += math.log(self.binaryFeatProbDictT2[feature]['False'], 10)
-            logJointProbT2 += math.log(self.priorProbT2, 10)
+        if len(self.binaryFeatures) > 0:
+            for i in range(0,len(self.binaryFeatures)): # no of binary features
+                feature = self.binaryFeatures[i]
+                if singleMatchData['teams'][0][feature] == True:
+                    logJointProbT2 += math.log(self.binaryFeatProbDictT2[feature]['True'], 10)
+                else:
+                    logJointProbT2 += math.log(self.binaryFeatProbDictT2[feature]['False'], 10)
+        logJointProbT2 += math.log(self.priorProbT2, 10)
         print("logJointProbT1",logJointProbT1)
         print("logJointProbT2",logJointProbT2)
         if logJointProbT1 > logJointProbT2:
