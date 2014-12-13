@@ -9,6 +9,11 @@ def jose():
     data = loadJsonFile("datadump.txt")
     training, testing = split_data(data, 600)
 
+    # types = []
+    # for type in ['NORMAL_5x5_BLIND', 'ARAM_5x5', 'RANKED_SOLO_5x5']:
+    #     newData = getQueueType(data, [type])
+    #     eda(newData)
+
     # print "Training Set %d" % len(training)
     # print "Testing Set %d" % len(testing)
     #
@@ -31,43 +36,45 @@ def jose():
     #     resultList.append(result)
     # print "Average Result %02f" % (sum(resultList) / len(resultList))
 
+    # for type in ['NORMAL_5x5_BLIND', 'ARAM_5x5', 'RANKED_SOLO_5x5']:
+    #     newData = getQueueType(data, [type])
+    # firstFeaturesNaiveBayes(training, testing, ['firstTower', 'firstBlood', 'firstBaron', 'firstInhibitor', 'firstDragon'], False)
     firstFeaturesNaiveBayes(training, testing, ['firstTower', 'firstBlood', 'firstBaron', 'firstInhibitor', 'firstDragon', 'assists','deaths','kills'], False)
 
     # decisionTree(data)
 
-def decisionTree(data):
-    print "Decision Tree"
+def eda(data):
+    dict = {}
+    count = 0
+    count2 = 0
     features = ['firstTower', 'firstBlood']
-
-    results = getWinsandLoasses(data, features)
-
-    # while len(features) > 0:
-
-    informationGainPerFeature = {}
-    h = H(results['Wins'], results['Loses'])
-    total = results['Wins'] + results['Loses']
-    print total
-
     for feature in features:
-        print feature
-        valueTrueFalseFeature = results[feature][True][False]
-        valueTrueTrueFeature = results[feature][True][True]
+        dict[feature] = 0
+    for index, match in enumerate(data):
+        teamResults = match['teams']
 
-        valueTrueFeature = H(valueTrueTrueFeature, valueTrueFalseFeature)
-        # print valueTrueFeature
 
-        valueFalseFalseFeature = results[feature][False][False]
-        valueFalseTrueFeature = results[feature][False][True]
+        for team in teamResults:
 
-        valueFalseFeature = H(valueFalseTrueFeature, valueFalseFalseFeature)
-        print valueFalseFeature
+            for feature in features:
+                if team['winner'] and team[feature]:
+                    dict[feature] += 1
 
-        impurityPerFeature = 1.0 * (valueTrueFalseFeature + valueTrueTrueFeature) / total * valueTrueFeature + 1.0 * (valueFalseFalseFeature + valueFalseTrueFeature) / total * valueFalseFeature
 
-        informationGainPerFeature[feature] = impurityPerFeature
-
-    print informationGainPerFeature
-
+            wonAll = True
+            for feature in features:
+                if team[feature] != True:
+                    wonAll = False
+            if wonAll and team['winner']:
+                count += 1
+            if wonAll:
+                count2 += 1
+    if count2 != 0:
+        print (1.0 * count / count2)
+    print dict
+    for feature in features:
+        dict[feature] = 1.0 * dict[feature] / len(data)
+    print dict
 
 def H(p, n):
     print p
@@ -259,11 +266,6 @@ def firstFeaturesNaiveBayes(training, testing, teamFeatures, debug):
                     kills = participant['stats'][feature]
 
                     bucket = getBucketForValue(kills, totalCount[feature]['buckets'])
-                    if bucket == None:
-                        print "FATAL ERROR"
-                        print feature
-                        print kills
-                        print totalCount[feature]['buckets']
 
                     valueTrue = (totalCount[feature][bucket][True] + k) / float(totalCount['Wins'])
                     totalTrue += valueTrue

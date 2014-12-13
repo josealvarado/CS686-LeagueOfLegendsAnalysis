@@ -3,28 +3,24 @@ __author__ = 'josealvarado'
 import ast
 import math
 from random import shuffle
+import numpy as np
+from sklearn.cross_validation import KFold
+
 
 class DecisionTree():
     '''
     Sklearn-style decision tree classifier, using entropy
     '''
-    def __init__(self, file_name = "test.txt", features = ['firstTower', 'firstBlood', 'firstBaron', 'firstInhibitor', 'firstDragon'], attrib_d=None, attribs=None, default_v=None):
+    def __init__(self, file_name = "datadump.txt", features = ['firstTower', 'firstBlood', 'firstBaron', 'firstInhibitor', 'firstDragon'], attrib_d=None, attribs=None, default_v=None):
         ''' initialize classifier
         '''
 
         self.data = self.loadJsonFile(file_name)
-        self.data = self.getQueueType(self.data, ['NORMAL_5x5_BLIND', 'RANKED_SOLO_5x5'])
+        # self.data = self.getQueueType(self.data, ['NORMAL_5x5_BLIND', 'RANKED_SOLO_5x5'])
+        # self.data = self.getQueueType(self.data, ['RANKED_SOLO_5x5'])
+        self.data = self.getQueueType(self.data, ['ARAM_5x5'])
 
         self.features = features
-
-        # if not attribs:
-        #     attribs = []
-        # if attrib_d:
-        #     self.attrib_dict = attrib_d
-        # else:
-        #     self.attrib_dict = {}
-        # self.attribute_list = attribs
-        # self.default_value = default_v
 
         "*** YOUR CODE HERE AS NEEDED ***"
 
@@ -382,7 +378,11 @@ if __name__ == '__main__':
     tree.fit()
     tree.predict()
 
-    data = tree.data
-    shuffle(data)
-    training, testing = split_data(data, (int)(len(data) * .8))
-    tree.predict(training)
+    # data = tree.data
+    # shuffle(data)
+    # training, testing = split_data(data, (int)(len(data) * .8))
+    # tree.predict(training)
+
+    # kf = KFold(40, n_folds=10)
+    # for train, test in kf:
+    #   print("%s %s" % (train, test))
