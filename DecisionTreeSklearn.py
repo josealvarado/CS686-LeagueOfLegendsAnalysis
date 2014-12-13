@@ -10,29 +10,30 @@ import ast
 data_file = "datadump.txt"
 txt = open(data_file)
 data = []
-#queueType = 'NORMAL_5x5_BLIND'
-queueType = 'ARAM_5x5'
-#queueType = "ALL"
+#queueType = 'RANKED_SOLO_5x5'
+queueType = 'NORMAL_5x5_BLIND'
+#queueType = 'ARAM_5x5'
+#queueType = "MIXED"
 for i,dat in enumerate(txt):
     dat = ast.literal_eval(dat)
     if dat['queueType'] == queueType:
         dat = str(dat)
         data.append(dat)
-    elif queueType == 'ALL':
+    elif queueType == 'MIXED':
         dat = str(dat)
         data.append(dat)
 #Combine features of both teams and predict
-binaryFeatures = ['firstInhibitor','firstTower','firstBaron','firstBlood','firstDragon']
-continuousFeaturesList = []
+binaryFeatures = ['firstInhibitor','firstBaron','firstDragon','firstTower','firstBlood']
+
+continuousFeaturesList = ['baronKills','dragonKills']
+# exceptionFeatureList is the one which contains the features those with higher
 exceptionFeatureList = ['deaths','magicDamageTaken','physicalDamageTaken','totalDamageTaken',
                         'visionWardsBoughtInGame','wardsKilled','wardsPlaced']
-
 
 X = []
 Y = []
 for i in range(0,len(data)):
     singleMatch = ast.literal_eval(data[i])
-    #print("singleMatch",singleMatch)
     teamsTotalValueList = []
     '''For Team 1 and Team 2'''
     tempList = []
@@ -45,7 +46,6 @@ for i in range(0,len(data)):
                 tempList.append(featureValue)
 
     '''Training for continuous feature values '''
-    #print("tempList 1",tempList)
     if len(continuousFeaturesList) > 0:
         for i in range(0,len(continuousFeaturesList)):
             feature = continuousFeaturesList[i]
@@ -63,7 +63,7 @@ for i in range(0,len(data)):
                 if t==1:
                     for i in range(5,10):
                         try:
-                            featureValueSum = singleMatch['participants'][i]['stats'][feature] # i =5 means player1
+                            featureValueSum = singleMatch['participants'][i]['stats'][feature] # i =5 means player5
                         except IndexError:
                             pass
                         except KeyError:
@@ -75,18 +75,13 @@ for i in range(0,len(data)):
                 tempList.append(1)
             else:
                 tempList.append(0)
-        #print("temp list 2",tempList)
     if singleMatch['teams'][0]['winner'] == True:
         result = 'T1'
     else:
         result = 'T2'
     Y.append(result)
     X.append(tempList)
-    #print("tempList",tempList)
-    #sys.exit(0)
-#print("Y",Y)
-#print("X",X)
-#sys.exit(0)
+
 X = np.array(X)
 Y = np.array(Y)
 dctAccuracyList = []
@@ -98,10 +93,6 @@ for train, test in kf:
     Y_train = Y[train]
     X_test = X[test]
     Y_test = Y[test]
-    #print("X_train",X_train)
-    #print("Y_train",Y_train)
-    #sys.exit(0)
-
     ''' Decision tree implementation '''
     dtc = DecisionTreeClassifier()
     dtc = dtc.fit(X_train,Y_train)
@@ -111,7 +102,6 @@ for train, test in kf:
         if Y_test[i] == dtc[i]:
             correct +=1
     accuracy = (float)(correct/len(Y_test))* (100)
-    # dctAccuracyList.append(accuracy)
     acc_total+=accuracy
 
     print("Decision tree accuracy is:",accuracy)

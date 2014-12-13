@@ -26,9 +26,11 @@ class LeagueOfLegends:
         data_file = "datadump.txt"
         txt = open(data_file)
         data = self.data # Data about all the matches
-        #queueType = 'NORMAL_5x5_BLIND'
+        queueType = 'NORMAL_5x5_BLIND'
+        #queueType = 'RANKED_SOLO_5x5'
         #queueType = 'ARAM_5x5'
-        queueType = "MIXED"
+        #queueType = "MIXED"
+
         for i,dat in enumerate(txt):
             dat = ast.literal_eval(dat)
             if dat['queueType'] == queueType:
@@ -56,12 +58,10 @@ class LeagueOfLegends:
         ''' Declare the feature list '''
         continuousFeatures = self.continuousFeatures
         binaryFeatures = self.binaryFeatures
-        # featureList = ['physicalDamageTaken', 'neutralMinionsKilled', 'inhibitorKills', 'neutralMinionsKilledEnemyJungle',
-        #                'magicDamageDealtToChampions', 'towerKills', 'goldSpent', 'doubleKills', 'killingSprees','firstBloodKill']
+        binaryFeatures = ['firstInhibitor','firstBaron','firstDragon']
+        continuousFeatures = [ 'towerKills','inhibitorKills','baronKills','dragonKills']
 
-        binaryFeatures = ['firstInhibitor','firstTower','firstBaron','firstBlood','firstDragon']
-        continuousFeatures = ['towerKills','inhibitorKills','baronKills','dragonKills']
-
+        self.binaryFeatures = binaryFeatures
         self.continuousFeatures = continuousFeatures
         ''' Count of no of time Team1 winning and Team2 winning '''
         teamOneWinCount = 0
@@ -75,7 +75,7 @@ class LeagueOfLegends:
         print "Team1 wins",teamOneWinCount,"times and Team2 wins",teamTwoWinCount,"times" # 373 and 297
 
         ''' Calculate the prior probabilities '''
-        priorProbT1 = (float)(teamOneWinCount)/(float)(len(trainingData)) # change the len back to no of matches
+        priorProbT1 = (float)(teamOneWinCount)/(float)(len(trainingData))
         priorProbT2 = (float)(teamTwoWinCount)/(float)(len(trainingData))
         self.priorProbT1 = priorProbT1
         self.priorProbT2 = priorProbT2
@@ -149,9 +149,6 @@ class LeagueOfLegends:
             teamOneFeatureValueSumDict[feature] = {}
             teamTwoFeatureValueSumDict[feature] = {}
             for m in range(0, len(trainingData)): # go through single match's data
-                #print(m)
-                #print("data",data[0])
-                #sys.exit(0)
                 teamOneSingleMatchFeatureValue = 0 # Team's sum of feature values for a single match and for specific feature
                 teamTwoSingleMatchFeatureValue = 0
                 #print("feature",feature)
@@ -186,7 +183,7 @@ class LeagueOfLegends:
                 ''' Storing individual match's sum of feature values for Team1 and Team2'''
                 teamOneFeatureValueSumDict[feature][m] = teamOneSingleMatchFeatureValue
                 teamTwoFeatureValueSumDict[feature][m] = teamTwoSingleMatchFeatureValue
-            ''' Storing gaussian mean values for each feature for Y1 and Y2'''
+            ''' Storing gaussian mean values for each feature for T1 and T2'''
             meanDictT1[feature] = teamOneFeatureValue / teamOneWinCount
             meanDictT2[feature] = teamTwoFeatureValue / teamTwoWinCount
 
@@ -195,7 +192,7 @@ class LeagueOfLegends:
         print("teamOneFeatureValueSum",teamOneFeatureValueSumDict)
         #print("myList",myList)
         print("teamTwoFeatureValueSum",teamTwoFeatureValueSumDict)
-        ''' Calculate Gaussian variance for all the continuous features when y is Y1(Team1 wins) and Y2(Team2 wins) '''
+        ''' Calculate Gaussian variance for all the continuous features when y is T1(Team1 wins) and T2(Team2 wins) '''
         varianceDictY1 = self.varianceDictT1
         varianceDictY2 = self.varianceDictT2
         for f in range(0,len(continuousFeatures)):
@@ -239,12 +236,6 @@ class LeagueOfLegends:
             self.truthList.append('T1')
         else:
             self.truthList.append('T2')
-        #print("winStatus",winStatus)
-        #sys.exit(0)
-        #participantsList = singleMatchData['participants'][0]['stats']['killingSprees']
-        #print(participantsList)
-        #print("features",self.featureList)
-        #result = ((float)(1)/(float)(2*math.pi*23))* (math.exp((-0.5) * ((float)(math.pow((10-11),2))/(float)(23))))
         posteriorProbListT1 = [] #Stores the probabilities of each feature for a single match when T1 wins
         posteriorProbListT2 = [] #Stores the probabilities of each feature for a single match when T2 wins
         ''' Considering T1 wins '''
@@ -267,7 +258,6 @@ class LeagueOfLegends:
                     pass
                 except ZeroDivisionError:
                     posteriorProb = 1
-                    #pass
                 posteriorProbListT1.append(posteriorProb) # each posterior prob value is added to the list for single feature
 
         ''' Considering T2 wins '''
@@ -290,7 +280,6 @@ class LeagueOfLegends:
                     pass
                 except ZeroDivisionError:
                     posteriorProb = 1
-                    #pass
                 posteriorProbListT2.append(posteriorProb) # each posterior prob value is added to the list for single feature
         print("postProbListT1",posteriorProbListT1)
         print("postProbListT2",posteriorProbListT2)
@@ -337,10 +326,7 @@ class LeagueOfLegends:
             #print("T2 wins")
             self.guessList.append('T2')
 
-        #sys.exit(0)
-
 if __name__ == '__main__':
-    #main()
     obj = LeagueOfLegends()
     obj.readData()
     obj.trainLoLModel()

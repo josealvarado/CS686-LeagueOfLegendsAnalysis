@@ -13,13 +13,13 @@ txt = open(data_file)
 data = []
 #queueType = 'NORMAL_5x5_BLIND'
 #queueType = 'ARAM_5x5'
-queueType = "ALL"
+queueType = "MIXED"
 for i,dat in enumerate(txt):
     dat = ast.literal_eval(dat)
     if dat['queueType'] == queueType:
         dat = str(dat)
         data.append(dat)
-    elif queueType == 'ALL':
+    elif queueType == 'MIXED':
         dat = str(dat)
         data.append(dat)
 continuousFeaturesList = ['item3']
