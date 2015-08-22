@@ -16,7 +16,7 @@ import sys
 
 # def main():
 
-# lol = LeagueOfLegends('d17bf0eb-0ded-4c06-b41b-d9b03fbf6bd1')
+# lol = LeagueOfLegends('ENTER YOUR API KEY HERE')
 
     # Call the API with explicit summoner ID
     # id = lol.get_summoner_by_name('Brute_Ogre')
