@@ -97,6 +97,6 @@ if __name__ == '__main__':
         except :
             time.sleep(1)
 
-    # url = "https://na.api.pvp.net/api/lol/na/v2.2/match/" + game_id + "?api_key=d17bf0eb-0ded-4c06-b41b-d9b03fbf6bd1"
+    # url = "https://na.api.pvp.net/api/lol/na/v2.2/match/" + game_id + "?api_key=ENTER YOUR API KEY HERE"
     # r = requests.get(url)
     # print r.json()
