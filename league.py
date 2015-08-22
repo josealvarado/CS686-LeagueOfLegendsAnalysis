@@ -88,7 +88,7 @@ if __name__ == '__main__':
         time.sleep(1)
         # print value - i
         try:
-            url = "https://na.api.pvp.net/api/lol/na/v2.2/match/" + str(value - i) + "?api_key=d17bf0eb-0ded-4c06-b41b-d9b03fbf6bd1"
+            url = "https://na.api.pvp.net/api/lol/na/v2.2/match/" + str(value - i) + "?api_key=ENTER YOUR API KEY HERE"
 
             # print url
             r = requests.get(url)
